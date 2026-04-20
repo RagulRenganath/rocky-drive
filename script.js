@@ -223,15 +223,11 @@ function renderFileList() {
       downloadBtn.disabled = true;
       downloadBtn.textContent = 'Preparing...';
       try {
-        const { data, error } = await supabase.storage
-  .from(BUCKET)
-  .createSignedUrl(f.name, 60);
-
-if (error) throw error;
-
-if (data && data.signedUrl) {
+        const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(f.name, 60);
+        if (error) throw error;
+        if (data && data.signedUrl) {
   window.open(data.signedUrl, '_blank');
-} else {
+        } else {
   throw new Error('No signed URL returned');
 }
       } catch (err) {
