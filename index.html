@@ -3,387 +3,359 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rocky OS | Secure Vault & Intelligence</title>
+  <title>Rocky OS | Global Command Center</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --glass-bg: rgba(15, 23, 42, 0.55);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-hover: rgba(30, 41, 59, 0.65);
+      --glass-bg: rgba(10, 15, 28, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-hover: rgba(15, 23, 42, 0.8);
+      --accent: #38bdf8;
     }
 
-    /* Advanced Animated Background */
     body { 
       font-family: 'Inter', sans-serif; 
       color: #e2e8f0; 
       overflow-x: hidden;
       background-color: #020617; 
       background-image: 
-        radial-gradient(at 0% 0%, rgba(30, 27, 75, 0.8) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(23, 37, 84, 0.8) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(8, 47, 73, 0.8) 0px, transparent 50%);
+        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.08), transparent 25%);
       background-attachment: fixed;
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite alternate;
     }
 
-    @keyframes gradientShift {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 100% 100%; }
-      100% { background-position: 0% 100%; }
+    /* Ticker Tape */
+    .ticker-wrap {
+      width: 100%; overflow: hidden; background: rgba(0,0,0,0.8);
+      border-bottom: 1px solid var(--glass-border); position: relative; z-index: 50;
     }
-
-    /* Technical Grid Overlay */
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background-size: 40px 40px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-      -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-      pointer-events: none;
+    .ticker-content {
+      display: flex; white-space: nowrap; padding: 6px 0;
+      animation: tickerScroll 40s linear infinite; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
     }
+    @keyframes tickerScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+    .ticker-item { margin-right: 3rem; display: inline-flex; align-items: center; gap: 0.5rem; color: #94a3b8; }
+    .ticker-highlight { color: var(--accent); font-weight: bold; }
 
-    /* High-Contrast Glassmorphism */
+    /* Glass Panels */
     .glass-panel { 
-      background: var(--glass-bg); 
-      backdrop-filter: blur(24px); 
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--glass-border); 
-      border-radius: 16px; 
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      transition: border-color 0.3s ease, background 0.3s ease;
+      background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border); border-radius: 12px; 
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;
     }
+    .glass-panel:hover { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 10px 40px rgba(14, 165, 233, 0.1); }
 
-    .glass-panel:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: var(--glass-hover);
-    }
-
-    /* Inputs & Controls */
+    /* Forms & Controls */
     .premium-input {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.2s ease;
-      color: #fff;
+      background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff; transition: all 0.2s ease;
     }
-    
-    .premium-input:focus {
-      outline: none;
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-      background: rgba(0, 0, 0, 0.6);
-    }
+    .premium-input:focus { outline: none; border-color: var(--accent); background: rgba(0, 0, 0, 0.7); box-shadow: 0 0 0 2px rgba(56,189,248,0.2); }
 
     /* Buttons */
     .btn-cinematic {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
     }
-    
-    .btn-cinematic::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transition: all 0.5s ease;
+    .btn-cinematic:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; border: none; transition: all 0.2s;
     }
-
-    .btn-cinematic:hover::after {
-      left: 100%;
-    }
-
-    .btn-cinematic:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.4); 
-    }
+    .btn-primary:hover { box-shadow: 0 0 15px rgba(14,165,233,0.5); transform: translateY(-1px); }
 
     /* Progress Bar */
-    .progress-bar-container { 
-      height: 8px; 
-      border-radius: 999px; 
-      background: rgba(0,0,0,0.5); 
-      overflow: hidden; 
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    
-    .progress-fill { 
-      height: 100%; 
-      width: 0%; 
-      background: linear-gradient(90deg, #3b82f6, #38bdf8); 
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
-    }
+    .progress-bar-container { height: 6px; border-radius: 999px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent); }
 
-    /* Smooth Entrances */
-    .fade-enter { 
-      animation: cinematicFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; 
-    }
-
-    @keyframes cinematicFade { 
-      from { opacity: 0; transform: translateY(20px); filter: blur(5px); } 
-      to { opacity: 1; transform: none; filter: blur(0); } 
-    }
-
-    /* File List Styling */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
-
+    /* ★ CRITICAL: Structured File List Fix ★ */
+    #fileList { list-style: none; padding: 0; margin: 0; }
     #fileList li {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.05);
-      padding: 0.85rem 1.25rem;
-      border-radius: 10px;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      transition: all 0.2s;
     }
-    #fileList li:hover {
-      background: rgba(255,255,255,0.05);
-      transform: translateX(4px);
-      border-color: rgba(56,189,248,0.3);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    #fileList li:hover { background: rgba(255,255,255,0.08); border-color: rgba(56,189,248,0.3); }
     
-    /* API Market Widget Colors */
-    .text-green-glow { color: #34d399; text-shadow: 0 0 10px rgba(52, 211, 153, 0.4); }
-    .text-red-glow { color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.4); }
+    /* This forces the long file names to truncate with "..." */
+    #fileList li > :first-child {
+      flex: 1; 
+      min-width: 0; /* Magic property to allow flex child shrinking */
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      font-size: 0.875rem; color: #f1f5f9;
+    }
+    #fileList li button, #fileList li a { flex-shrink: 0; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.1); color: white; cursor: pointer; }
+
+    /* Small Utility Text */
+    .sys-text { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+    .val-text { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #cbd5e1; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-10 px-4 selection:bg-sky-500/30 selection:text-sky-100">
+<body class="min-h-screen flex flex-col items-center selection:bg-sky-500/30 selection:text-sky-100 pb-10">
 
-  <div class="bg-grid"></div>
+  <div class="ticker-wrap w-full">
+    <div class="ticker-content" id="osTicker">
+      <div class="ticker-item">INITIATING GLOBAL FEED...</div>
+    </div>
+  </div>
 
-  <header class="w-full max-w-6xl flex items-center justify-between mb-10 fade-enter" style="animation-delay: 0.1s;">
-    <div class="flex items-center gap-5">
-      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-400 flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.4)] relative overflow-hidden border border-white/10">
-        <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-        <svg class="relative z-10" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 11v6a3 3 0 003 3h4a3 3 0 003-3v-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <header class="w-full max-w-[1400px] flex items-center justify-between px-6 pt-8 pb-6">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-600 to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 11v6a3 3 0 003 3h4a3 3 0 003-3v-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-white drop-shadow-lg">Rocky OS</h1>
-        <p class="text-sm text-sky-200/80 font-medium tracking-wide">Encrypted Operating Environment</p>
+        <h1 class="text-xl font-bold tracking-tight text-white">Rocky OS</h1>
+        <p class="text-xs text-sky-400 font-mono tracking-wider" id="sysTimeHeader">00:00:00 SYNC</p>
       </div>
     </div>
-
-    <div class="flex items-center gap-3">
-      <button id="signOutBtn" class="hidden btn-cinematic px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30">
-        Terminate Session
+    <div class="flex items-center gap-4">
+      <div class="text-right hidden sm:block">
+        <p class="sys-text">Active Profile</p>
+        <p class="text-sm font-semibold text-white" id="profileIdentity">Encrypted User</p>
+      </div>
+      <button id="signOutBtn" class="hidden btn-cinematic px-4 py-2 rounded-lg text-red-400 text-xs font-bold uppercase tracking-wider hover:bg-red-500/10">
+        Terminate
       </button>
     </div>
   </header>
 
-  <main class="w-full max-w-6xl flex flex-col items-center relative z-10">
+  <main class="w-full max-w-[1400px] px-4 md:px-6 relative z-10 flex flex-col flex-1">
 
-    <section id="loginCard" class="glass-panel p-8 w-full max-w-md mx-auto fade-enter mt-10" style="animation-delay: 0.2s;">
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-2">System Access</h2>
-        <p class="text-sm text-slate-300">Authenticate to initialize environment.</p>
-      </div>
-
-      <div class="space-y-5">
+    <section id="loginCard" class="glass-panel p-8 w-full max-w-md mx-auto mt-20">
+      <h2 class="text-2xl font-bold text-white mb-1">Authorization Required</h2>
+      <p class="text-sm text-slate-400 mb-6">Enter protocol credentials.</p>
+      <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Encryption Key (Email)</label>
-          <input id="email" type="email" placeholder="user@domain.com" class="premium-input w-full p-3.5 rounded-xl text-sm placeholder-slate-500">
+          <label class="block sys-text mb-1">Encryption ID (Email)</label>
+          <input id="email" type="email" placeholder="sys@admin.com" class="premium-input w-full p-3 rounded-lg text-sm">
         </div>
-
         <div>
-          <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Passcode</label>
-          <input id="password" type="password" placeholder="••••••••" class="premium-input w-full p-3.5 rounded-xl text-sm placeholder-slate-500">
+          <label class="block sys-text mb-1">Passkey</label>
+          <input id="password" type="password" placeholder="••••••••" class="premium-input w-full p-3 rounded-lg text-sm">
         </div>
-
-        <button id="signInBtn" onclick="login()" class="btn-cinematic w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-sky-500 text-white font-bold tracking-wide mt-4 shadow-lg hover:shadow-sky-500/25">
-          Initialize
+        <button id="signInBtn" onclick="login()" class="btn-primary w-full py-3 rounded-lg font-bold tracking-wide mt-2">
+          Authenticate
         </button>
       </div>
-
-      <div id="loginError" class="mt-5 p-3.5 rounded-lg bg-red-900/40 border border-red-500/30 text-red-300 text-sm font-medium hidden text-center"></div>
+      <div id="loginError" class="mt-4 p-3 rounded-md bg-red-900/50 border border-red-500/30 text-red-300 text-xs text-center hidden"></div>
     </section>
 
-    <section id="uploadPanel" class="hidden w-full fade-enter" style="animation-delay: 0.3s;">
+    <section id="uploadPanel" class="hidden w-full h-full flex flex-col lg:flex-row gap-6 animate-[fadeIn_0.5s_ease]">
       
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="glass-panel p-6 flex flex-col justify-center items-center text-center">
-          <p class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-2">Local Sync</p>
-          <div id="sysTime" class="text-4xl font-light text-white tracking-tighter">00:00</div>
-          <div id="sysDate" class="text-sm font-medium text-sky-300 mt-1">Establishing...</div>
-        </div>
-
-        <div class="glass-panel p-6 flex flex-col justify-between">
-          <p class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4">Live Market Intelligence</p>
-          <div class="flex justify-between items-center mb-3">
-            <span class="text-sm font-semibold text-white">BTC/USD</span>
-            <span id="btcPrice" class="text-sm font-mono text-slate-300">Loading...</span>
-            <span id="btcChange" class="text-xs font-bold">-</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-semibold text-white">ETH/USD</span>
-            <span id="ethPrice" class="text-sm font-mono text-slate-300">Loading...</span>
-            <span id="ethChange" class="text-xs font-bold">-</span>
-          </div>
-        </div>
-
-        <div class="glass-panel p-6 flex flex-col justify-center">
-          <p class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-3">System Directive</p>
-          <p id="quoteText" class="text-sm italic text-slate-200 leading-relaxed">"Initializing intelligence protocols..."</p>
-          <p id="quoteAuthor" class="text-xs font-bold text-sky-400 mt-3 text-right">- System</p>
-        </div>
-      </div>
-
-      <div class="flex flex-col lg:flex-row gap-8">
+      <aside class="w-full lg:w-64 flex flex-col gap-4">
         
-        <div class="w-full lg:w-1/3">
-          <div class="glass-panel p-6 mb-6">
-            <h3 class="text-lg font-bold text-white mb-1">Data Ingress</h3>
-            <p class="text-xs text-slate-400 mb-6">Encrypt and upload payloads to the vault.</p>
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Network Intel</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between"><span class="sys-text text-slate-500">IP</span><span class="val-text text-sky-300" id="netIp">Detecting...</span></div>
+            <div class="flex justify-between"><span class="sys-text text-slate-500">LOC</span><span class="val-text" id="netLoc">Detecting...</span></div>
+            <div class="flex justify-between"><span class="sys-text text-slate-500">ISP</span><span class="val-text text-xs" id="netIsp">Detecting...</span></div>
+          </div>
+        </div>
 
-            <div id="dropArea" class="border-dashed border-2 border-slate-600/50 hover:border-sky-500/50 transition-colors rounded-xl p-6 text-center bg-black/20 flex flex-col items-center gap-4">
-              <label for="fileInput" class="cursor-pointer flex items-center justify-center gap-2 btn-cinematic px-5 py-3 rounded-lg bg-slate-800/80 border border-slate-600 text-white text-sm font-semibold w-full shadow-md hover:bg-slate-700">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                Select Payload
-              </label>
-              <input id="fileInput" type="file" class="hidden" />
-
-              <button id="uploadBtn" class="btn-cinematic px-5 py-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold w-full shadow-[0_0_15px_rgba(14,165,233,0.3)] border border-sky-400/30">
-                Execute Transfer
-              </button>
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Atmospheric Data</h3>
+          <div class="flex items-center gap-3 mb-2">
+            <div class="text-3xl font-light text-white" id="wTemp">--°</div>
+            <div class="flex flex-col">
+              <span class="val-text text-sky-400">Coimbatore</span>
+              <span class="sys-text text-slate-400">Status Active</span>
             </div>
+          </div>
+          <div class="flex justify-between mt-3"><span class="sys-text text-slate-500">Wind Spd</span><span class="val-text" id="wWind">-- km/h</span></div>
+        </div>
 
-            <div class="mt-6">
-              <div class="flex justify-between items-end mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Transfer Status</span>
-                <span id="progressText" class="text-xs font-mono font-bold text-sky-400">Standby</span>
-              </div>
-              <div class="progress-bar-container">
-                <div id="progressInner" class="progress-fill"></div>
-              </div>
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Orbital Radar (ISS)</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between"><span class="sys-text text-slate-500">LAT</span><span class="val-text text-green-400" id="issLat">0.0000</span></div>
+            <div class="flex justify-between"><span class="sys-text text-slate-500">LNG</span><span class="val-text text-green-400" id="issLng">0.0000</span></div>
+            <div class="flex justify-between"><span class="sys-text text-slate-500">VEL</span><span class="val-text" id="issVel">0 km/h</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-1 flex flex-col gap-6">
+        
+        <div class="glass-panel p-6 border border-sky-500/20">
+          <div class="flex justify-between items-end mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">Central Vault</h2>
+              <p class="sys-text">Encrypted Data Transfer Interface</p>
+            </div>
+            <div class="text-right">
+              <span class="sys-text text-slate-500">Status</span><br>
+              <span id="progressText" class="val-text text-sky-400">Standby</span>
+            </div>
+          </div>
+          
+          <div class="progress-bar-container mb-5"><div id="progressInner" class="progress-fill"></div></div>
+
+          <div id="dropArea" class="flex flex-col sm:flex-row gap-4 items-center bg-black/30 p-4 rounded-lg border border-dashed border-slate-600">
+            <label for="fileInput" class="cursor-pointer flex items-center justify-center gap-2 btn-cinematic px-5 py-2.5 rounded-md text-white text-sm font-semibold w-full sm:w-auto">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Insert File
+            </label>
+            <input id="fileInput" type="file" class="hidden" />
+            <button id="uploadBtn" class="btn-primary px-5 py-2.5 rounded-md text-sm font-semibold w-full sm:w-auto">
+              Execute Transfer
+            </button>
+            <div class="flex-1 flex gap-2 w-full">
+              <input id="searchInput" type="search" placeholder="Query DB..." class="premium-input w-full p-2.5 rounded-md text-sm" />
+              <select id="sortSelect" class="premium-input p-2.5 rounded-md text-sm cursor-pointer">
+                <option value="updated_desc">New</option><option value="updated_asc">Old</option>
+                <option value="name_asc">A-Z</option><option value="name_desc">Z-A</option>
+              </select>
             </div>
           </div>
         </div>
 
-        <div class="w-full lg:w-2/3">
-          <div class="glass-panel p-6 h-full flex flex-col">
-            
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-700 pb-5">
-              <h4 class="text-sm font-bold tracking-widest uppercase text-slate-300">Indexed Vault</h4>
-              
-              <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="relative w-full md:w-48">
-                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                  <input id="searchInput" type="search" placeholder="Query..." class="premium-input w-full pl-9 p-2 rounded-lg text-sm" />
-                </div>
-                <select id="sortSelect" class="premium-input p-2 rounded-lg text-sm text-slate-200 appearance-none pr-8 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23CBD5E1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:0.6rem_auto] bg-no-repeat bg-[position:right_0.5rem_center]">
-                  <option value="updated_desc">Latest</option>
-                  <option value="updated_asc">Oldest</option>
-                  <option value="name_asc">A-Z</option>
-                  <option value="name_desc">Z-A</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="flex-1 overflow-hidden flex flex-col">
-              <ul id="fileList" class="space-y-3 overflow-y-auto pr-3 flex-1">
-                </ul>
-              
-              <div id="emptyMsg" class="flex flex-col items-center justify-center py-16 text-center text-slate-500 h-full">
-                <svg class="w-12 h-12 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                <span class="text-sm font-medium">Vault is currently empty.</span>
-              </div>
-            </div>
+        <div class="glass-panel p-6 flex-1 flex flex-col min-h-[300px]">
+          <h3 class="sys-text mb-4 border-b border-white/10 pb-2">Indexed Archives</h3>
+          <ul id="fileList" class="flex-1 overflow-y-auto pr-2"></ul>
+          <div id="emptyMsg" class="py-10 text-center text-slate-500 sys-text hidden">Vault is empty</div>
+        </div>
 
+      </main>
+
+      <aside class="w-full lg:w-64 flex flex-col gap-4">
+        
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Time Matrix</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center"><span class="sys-text text-slate-500">LDN</span><span class="val-text" id="timeLdn">--:--</span></div>
+            <div class="flex justify-between items-center"><span class="sys-text text-slate-500">NYC</span><span class="val-text" id="timeNyc">--:--</span></div>
+            <div class="flex justify-between items-center"><span class="sys-text text-slate-500">TKY</span><span class="val-text" id="timeTky">--:--</span></div>
           </div>
         </div>
 
-      </div>
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Operational Task</h3>
+          <p id="osTask" class="text-sm text-slate-300 italic mb-2">Fetching directives...</p>
+          <div class="text-right"><span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">Priority: High</span></div>
+        </div>
+
+        <div class="glass-panel p-4">
+          <h3 class="sys-text mb-3 border-b border-white/10 pb-2">Intel Packet</h3>
+          <p id="osFact" class="text-xs text-slate-400 leading-relaxed">Decrypting general knowledge base...</p>
+        </div>
+
+        <div class="glass-panel p-4 mt-auto">
+          <h3 class="sys-text mb-2 border-b border-white/10 pb-2">SysAdmin Log</h3>
+          <p id="osJoke" class="text-xs font-mono text-emerald-400">Loading log...</p>
+        </div>
+
+      </aside>
     </section>
-
   </main>
 
-  <footer class="w-full max-w-6xl mt-12 mb-6 text-center text-[10px] font-bold tracking-widest text-slate-500 uppercase fade-enter" style="animation-delay: 0.4s;">
-    Rocky OS Interface • Built for Excellence
+  <footer class="w-full max-w-[1400px] mt-8 text-center text-slate-500 relative z-10 px-6">
+    <p class="sys-text" id="sysDirective">"System secure and operational."</p>
   </footer>
 
   <script>
-    // --- 1. Chronological Engine (Live Clock) ---
-    function updateClock() {
-      const now = new Date();
-      let hours = now.getHours();
-      let minutes = now.getMinutes();
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12; // the hour '0' should be '12'
-      minutes = minutes < 10 ? '0' + minutes : minutes;
-      
-      document.getElementById('sysTime').innerText = `${hours}:${minutes} ${ampm}`;
-      
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('sysDate').innerText = now.toLocaleDateString('en-US', options);
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    // System Clock
+    setInterval(() => {
+      const d = new Date();
+      document.getElementById('sysTimeHeader').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + ' SYNC';
+    }, 1000);
 
-    // --- 2. Live Market Intelligence (CoinGecko API) ---
-    async function fetchMarketData() {
+    const apiEngine = async () => {
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
-        const data = await res.json();
-        
-        // Format BTC
-        const btcPrice = data.bitcoin.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-        const btcChange = data.bitcoin.usd_24h_change.toFixed(2);
-        document.getElementById('btcPrice').innerText = btcPrice;
-        const btcChangeEl = document.getElementById('btcChange');
-        btcChangeEl.innerText = `${btcChange > 0 ? '+' : ''}${btcChange}%`;
-        btcChangeEl.className = btcChange > 0 ? 'text-xs font-bold text-green-glow' : 'text-xs font-bold text-red-glow';
+        // API 1, 2, 3: Ticker (CoinGecko, Frankfurter, HackerNews)
+        Promise.all([
+          fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd'),
+          fetch('https://api.frankfurter.app/latest?from=USD&to=INR,EUR'),
+          fetch('https://hacker-news.firebaseio.com/v0/topstories.json').then(r=>r.json()).then(ids=>fetch(`https://hacker-news.firebaseio.com/v0/item/${ids[0]}.json`))
+        ]).then(async ([cryptoRes, fxRes, hnRes]) => {
+          const crypto = await cryptoRes.json();
+          const fx = await fxRes.json();
+          const hn = await hnRes.json();
+          
+          let tickerHTML = `
+            <div class="ticker-item"><span class="ticker-highlight">BTC/USD:</span> $${crypto.bitcoin.usd.toLocaleString()}</div>
+            <div class="ticker-item"><span class="ticker-highlight">ETH/USD:</span> $${crypto.ethereum.usd.toLocaleString()}</div>
+            <div class="ticker-item"><span class="ticker-highlight">USD/INR:</span> ₹${fx.rates.INR}</div>
+            <div class="ticker-item"><span class="ticker-highlight">USD/EUR:</span> €${fx.rates.EUR}</div>
+            <div class="ticker-item"><span class="ticker-highlight">HACKER NEWS TOP:</span> ${hn.title}</div>
+          `;
+          document.getElementById('osTicker').innerHTML = tickerHTML + tickerHTML + tickerHTML; // Repeat for smooth loop
+        }).catch(()=>console.log("Ticker APIs offline"));
 
-        // Format ETH
-        const ethPrice = data.ethereum.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-        const ethChange = data.ethereum.usd_24h_change.toFixed(2);
-        document.getElementById('ethPrice').innerText = ethPrice;
-        const ethChangeEl = document.getElementById('ethChange');
-        ethChangeEl.innerText = `${ethChange > 0 ? '+' : ''}${ethChange}%`;
-        ethChangeEl.className = ethChange > 0 ? 'text-xs font-bold text-green-glow' : 'text-xs font-bold text-red-glow';
+        // API 4: Network Intel (GeoJS)
+        fetch('https://get.geojs.io/v1/ip/geo.json').then(r=>r.json()).then(data => {
+          document.getElementById('netIp').innerText = data.ip;
+          document.getElementById('netLoc').innerText = `${data.city}, ${data.country_code}`;
+          document.getElementById('netIsp').innerText = (data.organization_name || data.asn).substring(0, 15);
+        }).catch(()=>{});
 
-      } catch (error) {
-        console.log("Market API currently unavailable.");
-        document.getElementById('btcPrice').innerText = "Data Offline";
-        document.getElementById('ethPrice').innerText = "Data Offline";
-      }
-    }
-    
-    // --- 3. System Directive (DummyJSON Quotes API) ---
-    async function fetchQuote() {
-      try {
-        const res = await fetch('https://dummyjson.com/quotes/random');
-        const data = await res.json();
-        document.getElementById('quoteText').innerText = `"${data.quote}"`;
-        document.getElementById('quoteAuthor').innerText = `- ${data.author}`;
-      } catch (error) {
-        console.log("Quote API currently unavailable.");
-      }
-    }
+        // API 5: Weather (Open-Meteo - Defaulting to Coimbatore coords)
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=11.0168&longitude=76.9558&current_weather=true')
+          .then(r=>r.json()).then(data => {
+            document.getElementById('wTemp').innerText = Math.round(data.current_weather.temperature) + '°';
+            document.getElementById('wWind').innerText = data.current_weather.windspeed + ' km/h';
+        }).catch(()=>{});
 
-    // Initialize APIs on load
-    fetchMarketData();
-    fetchQuote();
-    // Refresh market data every 2 minutes to prevent rate limiting
-    setInterval(fetchMarketData, 120000); 
+        // API 6: Orbital (ISS) - Updates every 5 seconds
+        const fetchISS = () => {
+          fetch('https://api.wheretheiss.at/v1/satellites/25544').then(r=>r.json()).then(data => {
+            document.getElementById('issLat').innerText = data.latitude.toFixed(4);
+            document.getElementById('issLng').innerText = data.longitude.toFixed(4);
+            document.getElementById('issVel').innerText = Math.round(data.velocity) + ' km/h';
+          }).catch(()=>{});
+        };
+        fetchISS(); setInterval(fetchISS, 5000);
 
-    // Note: The UI script expects login(), which should be defined in your module script.js
-    // Your existing script.js module will handle the actual file uploading/auth logic perfectly.
+        // API 7: World TimeMatrix
+        const updateClocks = () => {
+          const opts = { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false };
+          document.getElementById('timeLdn').innerText = new Intl.DateTimeFormat('en-GB', opts).format(new Date());
+          opts.timeZone = 'America/New_York';
+          document.getElementById('timeNyc').innerText = new Intl.DateTimeFormat('en-US', opts).format(new Date());
+          opts.timeZone = 'Asia/Tokyo';
+          document.getElementById('timeTky').innerText = new Intl.DateTimeFormat('ja-JP', opts).format(new Date());
+        };
+        updateClocks(); setInterval(updateClocks, 60000);
+
+        // API 8: Todos (DummyJSON)
+        fetch('https://dummyjson.com/todos/random').then(r=>r.json()).then(data => {
+          document.getElementById('osTask').innerText = data.todo;
+        }).catch(()=>{});
+
+        // API 9: Useless Facts
+        fetch('https://uselessfacts.jsph.pl/api/v2/facts/random').then(r=>r.json()).then(data => {
+          document.getElementById('osFact').innerText = data.text;
+        }).catch(()=>{});
+
+        // API 10: JokeAPI (Programming safe)
+        fetch('https://v2.jokeapi.dev/joke/Programming?type=single&safe-mode').then(r=>r.json()).then(data => {
+          document.getElementById('osJoke').innerText = `> ${data.joke}`;
+        }).catch(()=>{});
+
+        // API 11 (Bonus): System Quotes
+        fetch('https://dummyjson.com/quotes/random').then(r=>r.json()).then(data => {
+          document.getElementById('sysDirective').innerText = `"${data.quote}" - ${data.author}`;
+        }).catch(()=>{});
+
+        // API 12 (Bonus): Identity Predictor (Agify based on Rocky)
+        fetch('https://api.agify.io?name=rocky').then(r=>r.json()).then(data => {
+          document.getElementById('profileIdentity').innerText = `Rocky // ID-${data.age || 99}`;
+        }).catch(()=>{});
+
+      } catch (e) { console.log("OS Intel Engine Error:", e); }
+    };
+
+    // Boot API engine
+    apiEngine();
   </script>
 
   <script type="module" src="script.js"></script>
