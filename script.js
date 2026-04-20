@@ -1,15 +1,21 @@
-// script.js (module) — Rocky's Drive (secure)
+// script.js (FULL REWRITTEN VERSION)
+// Rocky's Drive - Secure + Fixed Upload + Fixed Download + Better Auth
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// Use your project URL and bucket
+/* --------------------------------------------------
+   CONFIG
+-------------------------------------------------- */
 const SUPABASE_URL = 'https://eogdsmdypdaxvshaociu.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvZ2RzbWR5cGRheHZzaGFvY2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NDEzOTYsImV4cCI6MjA3MDMxNzM5Nn0.MTd38DP8nAU1_4MqHDnisQvaSKova5N995tla4Vko8s';
+const SUPABASE_KEY ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvZ2RzbWR5cGRheHZzaGFvY2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3NDEzOTYsImV4cCI6MjA3MDMxNzM5Nn0.MTd38DP8nAU1_4MqHDnisQvaSKova5N995tla4Vko8s';
+
 const BUCKET = 'asbacademicdocuments';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* DOM */
+/* --------------------------------------------------
+   DOM
+-------------------------------------------------- */
 const loginCard = document.getElementById('loginCard');
 const uploadPanel = document.getElementById('uploadPanel');
 const emailInput = document.getElementById('email');
@@ -26,30 +32,67 @@ const fileListEl = document.getElementById('fileList');
 const emptyMsg = document.getElementById('emptyMsg');
 const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
-const dropArea = document.getElementById('dropArea');
 
 let currentFiles = [];
 let uploading = false;
 
-/* ---------- Auth & Session ---------- */
-async function showLoginError(msg) {
+/* --------------------------------------------------
+   HELPERS
+-------------------------------------------------- */
+function showError(msg) {
   loginError.textContent = msg;
   loginError.classList.remove('hidden');
 }
 
+function clearError() {
+  loginError.classList.add('hidden');
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '—';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  while (bytes >= 1024 && i < units.length - 1) {
+    bytes /= 1024;
+    i++;
+  }
+  return `${bytes.toFixed(1)} ${units[i]}`;
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, (m) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[m]);
+}
+
+/* --------------------------------------------------
+   AUTH
+-------------------------------------------------- */
 async function login() {
+  clearError();
+
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
+
   if (!email || !password) {
-    showLoginError('Enter email and password.');
+    showError('Enter email and password.');
     return;
   }
-  loginError.classList.add('hidden');
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
   if (error) {
-    showLoginError(error.message);
+    showError(error.message);
     return;
   }
+
   await checkSession();
 }
 
@@ -57,8 +100,8 @@ window.login = login;
 
 async function checkSession() {
   const { data } = await supabase.auth.getUser();
-  if (data && data.user) {
-    // logged in
+
+  if (data.user) {
     loginCard.classList.add('hidden');
     uploadPanel.classList.remove('hidden');
     signOutBtn.classList.remove('hidden');
@@ -75,198 +118,185 @@ signOutBtn.addEventListener('click', async () => {
   location.reload();
 });
 
-/* ---------- Upload (XHR for progress) ---------- */
-uploadBtn.addEventListener('click', () => {
-  const f = fileInput.files[0];
-  if (!f) return alert('Choose a file first.');
-  uploadFileWithProgress(f);
+/* --------------------------------------------------
+   UPLOAD
+-------------------------------------------------- */
+uploadBtn.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    alert('Choose file first.');
+    return;
+  }
+
+  await uploadFile(file);
 });
 
-fileInput.addEventListener('change', () => {
-  const f = fileInput.files[0];
-  if (f) progressText.textContent = `${f.name} ready`;
-});
+async function uploadFile(file) {
+  if (uploading) return;
 
-/* drag & drop UX */
-['dragenter','dragover'].forEach(e => dropArea.addEventListener(e, (ev) => { ev.preventDefault(); dropArea.classList.add('ring-2','ring-white/6'); }));
-['dragleave','drop'].forEach(e => dropArea.addEventListener(e, (ev) => { ev.preventDefault(); setTimeout(()=>dropArea.classList.remove('ring-2','ring-white/6'),80); }));
-dropArea.addEventListener('drop', (ev) => {
-  const f = (ev.dataTransfer.files || [])[0];
-  if (!f) return;
-  fileInput.files = ev.dataTransfer.files;
-  uploadFileWithProgress(f);
-});
-
-async function uploadFileWithProgress(file) {
-  if (uploading) return alert('Wait for current upload to finish.');
   uploading = true;
-  progressInner.style.width = '0%';
-  progressText.textContent = `Uploading ${file.name}...`;
 
   try {
-    const nameEnc = encodeURIComponent(file.name);
-    const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${nameEnc}?upsert=true`;
+    progressText.textContent = 'Uploading...';
+    progressInner.style.width = '30%';
 
-    await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', url, true);
-      xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_KEY}`);
-      xhr.setRequestHeader('apikey', SUPABASE_KEY);
+    const filePath = file.name;
 
-      xhr.upload.onprogress = (ev) => {
-        if (ev.lengthComputable) {
-          const pct = Math.round(ev.loaded / ev.total * 100);
-          progressInner.style.width = pct + '%';
-          progressText.textContent = `${pct}% — ${file.name}`;
-        }
-      };
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(filePath, file, {
+        upsert: true,
+      });
 
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) resolve();
-        else reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText} — ${xhr.responseText}`));
-      };
-      xhr.onerror = () => reject(new Error('Network error during upload.'));
-      xhr.send(file);
-    });
+    if (error) throw error;
 
     progressInner.style.width = '100%';
-    progressText.textContent = `Uploaded ${file.name}`;
-    setTimeout(()=> loadFiles(), 400);
+    progressText.textContent = 'Upload complete';
+
+    fileInput.value = '';
+    await loadFiles();
+
+    setTimeout(() => {
+      progressInner.style.width = '0%';
+      progressText.textContent = 'Idle';
+    }, 1200);
+
   } catch (err) {
-    alert(err.message || 'Upload failed');
-    console.error(err);
+    alert('Upload failed: ' + err.message);
+    progressText.textContent = 'Upload failed';
+    progressInner.style.width = '0%';
   } finally {
     uploading = false;
-    setTimeout(()=> { progressInner.style.width = '0%'; progressText.textContent = 'Idle'; }, 1000);
   }
 }
 
-/* ---------- Listing, search, sort, download, delete ---------- */
+/* --------------------------------------------------
+   LOAD FILES
+-------------------------------------------------- */
 async function loadFiles() {
   fileListEl.innerHTML = '';
   emptyMsg.style.display = 'none';
-  progressText.textContent = 'Loading files...';
 
-  try {
-    const { data, error } = await supabase.storage.from(BUCKET).list('', { limit: 1000 });
-    if (error) throw error;
-    currentFiles = (data || []).map(f => ({ name: f.name, updated_at: f.updated_at || f.created_at, size: f.size || (f.metadata && f.metadata.size) || null }));
-    renderFileList();
-  } catch (err) {
-    console.error(err);
-    alert('Failed to load files: ' + (err.message || err));
-    emptyMsg.style.display = 'block';
-  } finally {
-    progressText.textContent = 'Idle';
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .list('', {
+      limit: 1000,
+      sortBy: { column: 'updated_at', order: 'desc' }
+    });
+
+  if (error) {
+    alert('Load failed: ' + error.message);
+    return;
   }
+
+  currentFiles = data || [];
+  renderFiles();
 }
 
-function formatBytes(bytes) {
-  if (bytes === null || bytes === undefined) return '—';
-  const units = ['B','KB','MB','GB','TB'];
-  let i = 0, n = Number(bytes);
-  while (n >= 1024 && i < units.length-1) { n /= 1024; i++; }
-  return `${n.toFixed(n < 10 && i > 0 ? 2 : 1)} ${units[i]}`;
-}
+/* --------------------------------------------------
+   RENDER
+-------------------------------------------------- */
+function renderFiles() {
+  let files = [...currentFiles];
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+  const q = searchInput.value.trim().toLowerCase();
 
-function iconFromName(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  if (['png','jpg','jpeg','gif','webp','svg'].includes(ext)) return '🖼️';
-  if (ext==='pdf') return '📄';
-  if (['zip','rar','7z','tar','gz'].includes(ext)) return '🗜️';
-  if (['doc','docx'].includes(ext)) return '📝';
-  if (['xls','xlsx','csv'].includes(ext)) return '📊';
-  return '📁';
-}
+  if (q) {
+    files = files.filter(f => f.name.toLowerCase().includes(q));
+  }
 
-function renderFileList() {
-  const q = (searchInput.value || '').toLowerCase().trim();
-  let list = currentFiles.slice();
+  const sort = sortSelect.value;
 
-  if (q) list = list.filter(f => f.name.toLowerCase().includes(q));
-  const s = sortSelect.value;
-  if (s === 'updated_desc') list.sort((a,b)=> (b.updated_at||'').localeCompare(a.updated_at||''));
-  else if (s === 'updated_asc') list.sort((a,b)=> (a.updated_at||'').localeCompare(b.updated_at||''));
-  else if (s === 'name_asc') list.sort((a,b)=> a.name.localeCompare(b.name));
-  else if (s === 'name_desc') list.sort((a,b)=> b.name.localeCompare(a.name));
+  if (sort === 'name_asc') {
+    files.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  if (sort === 'name_desc') {
+    files.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
+  if (!files.length) {
+    emptyMsg.style.display = 'block';
+    return;
+  }
 
   fileListEl.innerHTML = '';
-  if (!list.length) { emptyMsg.style.display = 'block'; return; } else emptyMsg.style.display = 'none';
 
-  list.forEach(f => {
+  files.forEach(file => {
     const li = document.createElement('li');
-    li.className = 'p-3 rounded-lg bg-white/3 flex items-center justify-between gap-3 transition hover:bg-white/6';
+
+    li.className =
+      'p-3 rounded-lg bg-white/5 flex items-center justify-between gap-3';
+
     li.innerHTML = `
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-md bg-white/6 flex items-center justify-center text-sm font-semibold">${iconFromName(f.name)}</div>
-          <div class="min-w-0">
-            <div class="font-medium truncate">${escapeHtml(f.name)}</div>
-            <div class="small text-white/60">${f.updated_at ? new Date(f.updated_at).toLocaleString() : '—'} • ${formatBytes(f.size)}</div>
-          </div>
+      <div class="flex-1">
+        <div class="font-medium truncate">${escapeHtml(file.name)}</div>
+        <div class="small text-white/60">
+          ${formatBytes(file.metadata?.size)}
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button class="downloadBtn px-3 py-1 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white small">Download</button>
-        <button class="deleteBtn px-3 py-1 rounded-md bg-red-600/90 text-white small">Delete</button>
+
+      <div class="flex gap-2">
+        <button class="downloadBtn px-3 py-1 rounded bg-blue-600 text-white small">
+          Download
+        </button>
+
+        <button class="deleteBtn px-3 py-1 rounded bg-red-600 text-white small">
+          Delete
+        </button>
       </div>
     `;
 
-    const downloadBtn = li.querySelector('.downloadBtn');
-    const deleteBtn = li.querySelector('.deleteBtn');
-
-    downloadBtn.addEventListener('click', async () => {
-      downloadBtn.disabled = true;
-      downloadBtn.textContent = 'Preparing...';
+    /* DOWNLOAD */
+    li.querySelector('.downloadBtn').addEventListener('click', async () => {
       try {
-        const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(f.name, 60);
+        const { data, error } = await supabase.storage
+          .from(BUCKET)
+          .createSignedUrl(file.name, 60);
+
         if (error) throw error;
-        if (data && data.signedUrl) {
-  window.open(data.signedUrl, '_blank');
+
+        if (data?.signedUrl) {
+          window.open(data.signedUrl, '_blank');
         } else {
-  throw new Error('No signed URL returned');
-}
+          throw new Error('No signed URL');
+        }
+
       } catch (err) {
-        alert('Download failed: ' + (err.message || err));
-      } finally {
-        downloadBtn.disabled = false;
-        downloadBtn.textContent = 'Download';
+        alert('Download failed: ' + err.message);
       }
     });
 
-    deleteBtn.addEventListener('click', async () => {
-      const ok = confirm(`Delete "${f.name}"? This action cannot be undone.`);
+    /* DELETE */
+    li.querySelector('.deleteBtn').addEventListener('click', async () => {
+      const ok = confirm(`Delete "${file.name}"?`);
       if (!ok) return;
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = 'Deleting...';
-      try {
-        const { error } = await supabase.storage.from(BUCKET).remove([f.name]);
-        if (error) throw error;
-        li.style.transition = 'opacity .25s, transform .25s';
-        li.style.opacity = '0'; li.style.transform = 'translateY(8px)';
-        setTimeout(()=> li.remove(), 300);
-        setTimeout(loadFiles, 600);
-      } catch (err) {
-        alert('Delete failed: ' + (err.message || err));
-        deleteBtn.disabled = false; deleteBtn.textContent = 'Delete';
+
+      const { error } = await supabase.storage
+        .from(BUCKET)
+        .remove([file.name]);
+
+      if (error) {
+        alert('Delete failed: ' + error.message);
+        return;
       }
+
+      await loadFiles();
     });
 
     fileListEl.appendChild(li);
   });
 }
 
-/* ---------- events ---------- */
-searchInput.addEventListener('input', () => renderFileList());
-sortSelect.addEventListener('change', () => renderFileList());
+/* --------------------------------------------------
+   SEARCH / SORT
+-------------------------------------------------- */
+searchInput.addEventListener('input', renderFiles);
+sortSelect.addEventListener('change', renderFiles);
 
-/* ---------- init ---------- */
-(async function init(){
+/* --------------------------------------------------
+   INIT
+-------------------------------------------------- */
+(async () => {
   await checkSession();
 })();
-
-
