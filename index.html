@@ -3,362 +3,346 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rocky OS | Executive Dashboard</title>
+  <title>Rocky OS | Enterprise Vault</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --surface-bg: rgba(255, 255, 255, 0.7);
-      --surface-border: rgba(226, 232, 240, 0.8);
-      --surface-hover: rgba(255, 255, 255, 0.95);
-      --accent-primary: #0284c7; /* Sky 600 */
-      --accent-secondary: #0ea5e9; /* Sky 500 */
+      --bg-app: #f1f5f9; /* Slate 100 */
+      --bg-panel: #ffffff;
+      --border-color: #e2e8f0; /* Slate 200 */
       --text-main: #0f172a; /* Slate 900 */
       --text-muted: #64748b; /* Slate 500 */
+      --brand-primary: #0f172a; /* Deep Slate */
+      --brand-accent: #2563eb; /* Blue 600 */
     }
 
     body { 
       font-family: 'Inter', sans-serif; 
-      color: var(--text-main); 
-      overflow-x: hidden;
-      background-color: #f8fafc; /* Slate 50 Base */
-      /* Bright, subtle corporate gradient mesh */
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(224, 242, 254, 0.5) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(241, 245, 249, 0.8) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(219, 234, 254, 0.5) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(248, 250, 252, 0.8) 0px, transparent 50%);
-      background-attachment: fixed;
+      background-color: var(--bg-app); 
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Ticker Tape - Light Mode Corporate */
+    /* Enterprise Ticker */
     .ticker-wrap {
-      width: 100%; overflow: hidden; background: #ffffff;
-      border-bottom: 1px solid var(--surface-border); position: relative; z-index: 50;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      width: 100%; background: var(--brand-primary); color: #f8fafc;
+      overflow: hidden; display: flex; align-items: center; height: 32px;
     }
     .ticker-content {
-      display: flex; white-space: nowrap; padding: 8px 0;
-      animation: tickerScroll 35s linear infinite; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+      display: flex; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      animation: tickerScroll 40s linear infinite;
     }
     @keyframes tickerScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-    .ticker-item { margin-right: 3rem; display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); }
-    .ticker-highlight { color: var(--accent-primary); font-weight: 600; }
+    .ticker-item { margin-right: 3rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .ticker-up { color: #4ade80; } /* Green */
+    .ticker-down { color: #f87171; } /* Red */
 
-    /* Premium Light Glass Panels */
-    .glass-panel { 
-      background: var(--surface-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--surface-border); border-radius: 16px; 
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
-      transition: all 0.3s ease;
+    /* Panel Architecture */
+    .sys-panel { 
+      background: var(--bg-panel); border: 1px solid var(--border-color); 
+      border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+      transition: box-shadow 0.2s ease;
     }
-    .glass-panel:hover { 
-      background: var(--surface-hover);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025); 
-      transform: translateY(-2px);
-    }
+    .sys-panel:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08); }
 
-    /* Forms & Controls */
-    .premium-input {
-      background: #ffffff; border: 1px solid #cbd5e1; color: var(--text-main); transition: all 0.2s ease;
+    /* Forms & Inputs */
+    .form-input {
+      width: 100%; padding: 0.6rem 0.8rem; font-size: 0.875rem;
+      background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;
+      color: var(--text-main); transition: all 0.2s;
     }
-    .premium-input:focus { 
-      outline: none; border-color: var(--accent-secondary); 
-      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); 
-    }
-    .premium-input::placeholder { color: #94a3b8; }
+    .form-input:focus { outline: none; border-color: var(--brand-accent); background: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
     /* Buttons */
-    .btn-executive {
-      background: #ffffff; border: 1px solid #cbd5e1; color: var(--text-main); font-weight: 500; transition: all 0.2s;
+    .btn-solid {
+      background: var(--brand-primary); color: #fff; font-weight: 500; font-size: 0.875rem;
+      padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.2s; border: 1px solid transparent;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;
     }
-    .btn-executive:hover { background: #f8fafc; border-color: #94a3b8; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .btn-solid:hover { background: #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); 
-      color: white; border: none; font-weight: 500; transition: all 0.2s;
+    .btn-outline {
+      background: #fff; color: var(--text-main); font-weight: 500; font-size: 0.875rem;
+      padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.2s; border: 1px solid var(--border-color);
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;
     }
-    .btn-primary:hover { 
-      box-shadow: 0 4px 12px rgba(14,165,233,0.3); transform: translateY(-1px); 
-    }
+    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
 
     /* Progress Bar */
-    .progress-bar-container { height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0%; background: var(--accent-primary); transition: width 0.3s ease; }
+    .progress-track { height: 6px; border-radius: 4px; background: #e2e8f0; overflow: hidden; width: 100%; }
+    .progress-fill { height: 100%; width: 0%; background: var(--brand-accent); transition: width 0.3s ease; }
 
-    /* ★ Structured File List Fix (Light Mode) ★ */
+    /* Data Table / File List (Strict Formatting) */
     #fileList { list-style: none; padding: 0; margin: 0; }
     #fileList li {
-      background: #ffffff; border: 1px solid #e2e8f0;
-      border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem;
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);
+      transition: background 0.15s;
     }
-    #fileList li:hover { border-color: #bae6fd; box-shadow: 0 4px 6px rgba(0,0,0,0.04); transform: translateX(2px); }
+    #fileList li:last-child { border-bottom: none; }
+    #fileList li:hover { background: #f8fafc; }
     
-    /* Strict Truncation for long file names */
+    /* Strict Truncation for file names */
     #fileList li > :first-child {
-      flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      font-size: 0.875rem; color: var(--text-main); font-weight: 500;
+      font-size: 0.875rem; font-weight: 500; color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }
-    #fileList li button, #fileList li a { 
-      flex-shrink: 0; font-size: 0.75rem; padding: 6px 12px; border-radius: 6px; 
-      background: #f1f5f9; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
-    #fileList li button:hover, #fileList li a:hover { background: #e2e8f0; color: var(--text-main); }
-
-    /* Typography Utilities */
-    .sys-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; }
-    .data-value { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-main); font-weight: 500; }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f8fafc; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     
-    /* Image Filter for Cinematic Widget */
-    .cinematic-img { filter: contrast(1.1) saturate(1.2) brightness(0.9); }
+    /* Action Buttons inside File List */
+    #fileList li button, #fileList li a { 
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted); 
+      background: #f1f5f9; padding: 0.3rem 0.6rem; border-radius: 4px; 
+      transition: all 0.2s; border: 1px solid transparent; cursor: pointer;
+    }
+    #fileList li button:hover, #fileList li a:hover { color: var(--brand-accent); background: #eff6ff; border-color: #bfdbfe; }
+
+    /* Utilities */
+    .micro-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-muted); }
+    .mono-data { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center selection:bg-sky-200 selection:text-sky-900 pb-12">
+<body class="min-h-screen flex flex-col">
 
-  <div class="ticker-wrap w-full">
+  <div class="ticker-wrap">
     <div class="ticker-content" id="osTicker">
-      <div class="ticker-item">GATHERING MACRO DATA...</div>
+      <div class="ticker-item">ESTABLISHING SECURE CONNECTION...</div>
     </div>
   </div>
 
-  <header class="w-full max-w-[1400px] flex items-center justify-between px-6 pt-10 pb-8">
-    <div class="flex items-center gap-5">
-      <div class="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 11v6a3 3 0 003 3h4a3 3 0 003-3v-6" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v8" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </div>
+        <div class="flex flex-col">
+          <h1 class="text-sm font-bold tracking-tight text-slate-900 leading-tight">ROCKY OS</h1>
+          <span class="micro-label">Enterprise Resource Vault</span>
+        </div>
       </div>
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Rocky OS</h1>
-        <p class="text-xs text-slate-500 font-medium tracking-wide mt-1" id="sysDateHeader">Loading Date...</p>
+      
+      <div class="flex items-center gap-6">
+        <div class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-6">
+          <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          System Optimal
+        </div>
+        <button id="signOutBtn" class="hidden text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-red-600 transition-colors">
+          Sign Out
+        </button>
       </div>
-    </div>
-    <div class="flex items-center gap-4">
-      <div class="text-right hidden sm:block">
-        <p class="sys-label">Active Directory</p>
-        <p class="text-sm font-bold text-slate-800" id="profileIdentity">System Administrator</p>
-      </div>
-      <button id="signOutBtn" class="hidden btn-executive px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 hover:border-red-200">
-        Sign Out
-      </button>
     </div>
   </header>
 
-  <main class="w-full max-w-[1400px] px-4 md:px-6 relative z-10 flex flex-col flex-1">
+  <main class="w-full max-w-[1440px] mx-auto px-4 md:px-6 py-8 flex-1 flex flex-col relative z-10">
 
-    <section id="loginCard" class="glass-panel p-10 w-full max-w-md mx-auto mt-16 text-center">
-      <div class="w-16 h-16 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-6">
-        <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+    <section id="loginCard" class="sys-panel p-8 w-full max-w-sm mx-auto mt-12 animate-[fadeIn_0.3s_ease]">
+      <div class="text-center mb-6">
+        <h2 class="text-xl font-bold text-slate-900">Vault Access</h2>
+        <p class="text-xs text-slate-500 mt-1">Authorized personnel only.</p>
       </div>
-      <h2 class="text-2xl font-bold text-slate-900 mb-2">Vault Authentication</h2>
-      <p class="text-sm text-slate-500 mb-8">Secure access to corporate storage.</p>
-      
-      <div class="space-y-5 text-left">
+      <div class="space-y-4">
         <div>
-          <label class="block sys-label mb-2 text-slate-700">Corporate Email</label>
-          <input id="email" type="email" placeholder="admin@domain.com" class="premium-input w-full p-3.5 rounded-xl text-sm">
+          <label class="block micro-label mb-1.5">Corporate Email</label>
+          <input id="email" type="email" placeholder="user@enterprise.com" class="form-input">
         </div>
         <div>
-          <label class="block sys-label mb-2 text-slate-700">Security Key</label>
-          <input id="password" type="password" placeholder="••••••••" class="premium-input w-full p-3.5 rounded-xl text-sm">
+          <label class="block micro-label mb-1.5">Security Key</label>
+          <input id="password" type="password" placeholder="••••••••" class="form-input">
         </div>
-        <button id="signInBtn" onclick="login()" class="btn-primary w-full py-4 rounded-xl font-bold tracking-wide mt-4 shadow-md">
-          Authenticate
+        <button id="signInBtn" onclick="login()" class="btn-solid w-full mt-2">
+          Authenticate Protocol
         </button>
       </div>
-      <div id="loginError" class="mt-5 p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium hidden"></div>
+      <div id="loginError" class="mt-4 p-3 rounded-md bg-red-50 border border-red-100 text-red-600 text-xs font-medium text-center hidden"></div>
     </section>
 
-    <section id="uploadPanel" class="hidden w-full h-full flex flex-col xl:flex-row gap-6 animate-[fadeIn_0.5s_ease]">
+    <section id="uploadPanel" class="hidden w-full h-full animate-[fadeIn_0.4s_ease]">
       
-      <aside class="w-full xl:w-72 flex flex-col gap-5">
-        
-        <div class="glass-panel p-5">
-          <div class="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
-            <h3 class="sys-label">Macro Exchange</h3>
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between items-center"><span class="text-sm text-slate-500 font-medium">USD / INR</span><span class="data-value text-sky-600" id="fxInr">Loading...</span></div>
-            <div class="flex justify-between items-center"><span class="text-sm text-slate-500 font-medium">USD / EUR</span><span class="data-value" id="fxEur">Loading...</span></div>
-            <div class="flex justify-between items-center"><span class="text-sm text-slate-500 font-medium">USD / GBP</span><span class="data-value" id="fxGbp">Loading...</span></div>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        <div class="glass-panel p-5">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="sys-label">Cinematic Focus</h3>
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          </div>
-          <div class="w-full h-32 rounded-lg overflow-hidden bg-slate-100">
-            <img id="cinematicShot" src="https://picsum.photos/400/200?grayscale&blur=1" alt="Daily Focus" class="w-full h-full object-cover cinematic-img transition-opacity duration-500 opacity-0" onload="this.classList.remove('opacity-0')">
-          </div>
-          <p class="text-[10px] text-slate-400 mt-2 text-right">Visual Reference Matrix</p>
-        </div>
-
-        <div class="glass-panel p-5 flex-1">
-          <h3 class="sys-label mb-4 border-b border-slate-200 pb-2">High-Altitude Atmosphere</h3>
-          <div class="flex items-center gap-4 mb-4">
-            <div class="text-4xl font-light text-slate-800" id="wTemp">--°</div>
-            <div class="flex flex-col">
-              <span class="text-sm font-bold text-slate-700">Kodaikanal</span>
-              <span class="text-xs text-sky-600 font-medium">Elevation Sync</span>
-            </div>
-          </div>
-          <div class="flex justify-between items-center"><span class="text-xs text-slate-500">Wind Velocity</span><span class="data-value text-xs" id="wWind">-- km/h</span></div>
-        </div>
-
-      </aside>
-
-      <main class="flex-1 flex flex-col gap-6">
-        
-        <div class="glass-panel p-8">
-          <div class="flex justify-between items-end mb-6">
-            <div>
-              <h2 class="text-xl font-bold text-slate-900">Document Vault</h2>
-              <p class="text-sm text-slate-500 mt-1">Upload and index corporate files securely.</p>
-            </div>
-            <div class="text-right">
-              <span class="sys-label">Transfer Status</span><br>
-              <span id="progressText" class="data-value text-sky-600 text-sm">Standby</span>
-            </div>
-          </div>
+        <aside class="lg:col-span-3 flex flex-col gap-6">
           
-          <div class="progress-bar-container mb-6"><div id="progressInner" class="progress-fill"></div></div>
+          <div class="sys-panel p-5">
+            <h3 class="micro-label mb-3 text-slate-400">Local Environment Time</h3>
+            <div class="text-3xl font-light text-slate-900 tracking-tight" id="sysTimeLocal">00:00</div>
+            <div class="text-xs text-slate-500 font-medium mt-1" id="sysDateHeader">Loading...</div>
+          </div>
 
-          <div id="dropArea" class="flex flex-col sm:flex-row gap-4 items-center bg-slate-50 p-5 rounded-xl border border-dashed border-slate-300 transition-colors hover:border-sky-400">
-            <label for="fileInput" class="cursor-pointer flex items-center justify-center gap-2 btn-executive px-6 py-3 rounded-lg text-sm w-full sm:w-auto shadow-sm">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Browse Files
-            </label>
-            <input id="fileInput" type="file" class="hidden" />
-            <button id="uploadBtn" class="btn-primary px-6 py-3 rounded-lg text-sm w-full sm:w-auto">
-              Upload Document
-            </button>
-            <div class="flex-1 flex gap-3 w-full border-l-0 sm:border-l border-slate-200 pl-0 sm:pl-4">
-              <input id="searchInput" type="search" placeholder="Search indexing..." class="premium-input w-full p-3 rounded-lg text-sm" />
-              <select id="sortSelect" class="premium-input p-3 rounded-lg text-sm cursor-pointer min-w-[110px]">
-                <option value="updated_desc">Newest</option><option value="updated_asc">Oldest</option>
-                <option value="name_asc">A - Z</option><option value="name_desc">Z - A</option>
-              </select>
+          <div class="sys-panel p-5">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="micro-label text-slate-400">Global Exchange (USD)</h3>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <span class="text-xs font-semibold text-slate-600">INR</span>
+                <span class="mono-data text-slate-900" id="fxInr">Syncing...</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <span class="text-xs font-semibold text-slate-600">EUR</span>
+                <span class="mono-data text-slate-900" id="fxEur">Syncing...</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-slate-600">GBP</span>
+                <span class="mono-data text-slate-900" id="fxGbp">Syncing...</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="glass-panel p-8 flex-1 flex flex-col min-h-[400px]">
-          <h3 class="sys-label mb-5 border-b border-slate-200 pb-3">Indexed Archives</h3>
-          <ul id="fileList" class="flex-1 overflow-y-auto pr-3 space-y-2"></ul>
-          <div id="emptyMsg" class="py-16 text-center text-slate-400 text-sm font-medium hidden">
-            <svg class="w-12 h-12 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            No documents indexed in this vault.
+          <div class="sys-panel p-5">
+            <h3 class="micro-label mb-4 text-slate-400">Regional Atmosphere</h3>
+            <div class="flex items-center gap-4">
+              <div class="text-3xl font-light text-slate-800" id="wTemp">--°</div>
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-700">Kodaikanal Sector</span>
+                <span class="mono-data text-slate-500" id="wWind">-- km/h wind</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-      </main>
-
-      <aside class="w-full xl:w-72 flex flex-col gap-5">
-        
-        <div class="glass-panel p-5 text-center">
-          <p class="sys-label mb-2">Local Sync</p>
-          <div class="text-4xl font-light text-slate-800 tracking-tight" id="sysTimeLocal">00:00</div>
-          <div class="text-xs text-slate-500 font-medium mt-1">Indian Standard Time</div>
-        </div>
-
-        <div class="glass-panel p-5 flex-1">
-          <h3 class="sys-label mb-4 border-b border-slate-200 pb-2">Executive Directive</h3>
-          <p id="osQuote" class="text-sm text-slate-700 italic leading-relaxed mb-3">"Gathering operational framework..."</p>
-          <p id="osAuthor" class="text-xs font-bold text-sky-600 text-right">- System</p>
-        </div>
-
-        <div class="glass-panel p-5">
-          <h3 class="sys-label mb-4 border-b border-slate-200 pb-2">Security Protocol</h3>
-          <div class="space-y-3">
-            <div class="flex justify-between"><span class="text-xs text-slate-500">IP Addr</span><span class="data-value text-xs text-slate-700" id="netIp">Detecting...</span></div>
-            <div class="flex justify-between"><span class="text-xs text-slate-500">ISP Data</span><span class="data-value text-xs text-slate-700 w-32 text-right truncate" id="netIsp">Detecting...</span></div>
+          <div class="sys-panel p-5">
+            <h3 class="micro-label mb-3 text-slate-400">Connection Protocol</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center"><span class="text-xs text-slate-500">IPv4</span><span class="mono-data text-slate-800" id="netIp">Detecting...</span></div>
+              <div class="flex justify-between items-center"><span class="text-xs text-slate-500">Node</span><span class="mono-data text-slate-800 truncate w-32 text-right" id="netIsp">Detecting...</span></div>
+            </div>
           </div>
-        </div>
 
-      </aside>
+        </aside>
+
+        <main class="lg:col-span-9 flex flex-col gap-6">
+          
+          <div class="sys-panel p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900">Transfer Operations</h2>
+                <p class="text-xs text-slate-500 mt-1">Encrypt and index files into the central directory.</p>
+              </div>
+              <div class="w-full sm:w-48 text-left sm:text-right">
+                <span class="micro-label">Network Status</span>
+                <div class="flex items-center sm:justify-end gap-2 mt-1">
+                  <span class="mono-data text-brand-accent" id="progressText">Idle</span>
+                </div>
+                <div class="progress-track mt-2"><div id="progressInner" class="progress-fill"></div></div>
+              </div>
+            </div>
+            
+            <div id="dropArea" class="flex flex-col sm:flex-row gap-4 items-center bg-slate-50 p-4 rounded-lg border border-dashed border-slate-300">
+              <label for="fileInput" class="btn-outline w-full sm:w-auto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Select Target
+              </label>
+              <input id="fileInput" type="file" class="hidden" />
+              
+              <button id="uploadBtn" class="btn-solid w-full sm:w-auto">
+                Execute Upload
+              </button>
+              
+              <div class="flex-1 w-full border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-4 flex gap-2">
+                <input id="searchInput" type="search" placeholder="Search indexing..." class="form-input" />
+                <select id="sortSelect" class="form-input cursor-pointer min-w-[120px]">
+                  <option value="updated_desc">Latest</option>
+                  <option value="updated_asc">Oldest</option>
+                  <option value="name_asc">A to Z</option>
+                  <option value="name_desc">Z to A</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="sys-panel flex-1 flex flex-col min-h-[400px] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-8 micro-label text-slate-500">Document Identifier</div>
+                <div class="col-span-4 micro-label text-slate-500 text-right">Actions</div>
+              </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto">
+              <ul id="fileList">
+                </ul>
+              <div id="emptyMsg" class="py-20 text-center flex flex-col items-center hidden">
+                <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="text-sm font-medium text-slate-500">Vault directory is empty.</span>
+              </div>
+            </div>
+          </div>
+
+        </main>
+
+      </div>
     </section>
+
   </main>
 
-  <footer class="w-full max-w-[1400px] mt-10 text-center text-slate-400 relative z-10 px-6">
-    <p class="sys-label">Rocky OS • Enterprise Document Architecture</p>
-  </footer>
-
   <script>
-    // 1. System Clocks
+    // 1. Local Time Engine
     const updateTime = () => {
       const now = new Date();
       document.getElementById('sysTimeLocal').innerText = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false});
-      document.getElementById('sysDateHeader').innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('sysDateHeader').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
     };
     setInterval(updateTime, 1000); updateTime();
 
-    const fetchIntelligence = async () => {
+    // 2. API Data Engine (Built with try/catch fallbacks so it never breaks the UI)
+    const fetchData = async () => {
+      
+      // API 1: Market Ticker (CoinDesk - very reliable)
       try {
-        // 2. Global Macro Exchange (Frankfurter + CoinDesk for Ticker)
-        Promise.all([
-          fetch('https://api.frankfurter.app/latest?from=USD&to=INR,EUR,GBP'),
-          fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
-        ]).then(async ([fxRes, btcRes]) => {
-          const fx = await fxRes.json();
-          const btc = await btcRes.json();
-          
-          // Update Sidebar Widget
-          document.getElementById('fxInr').innerText = `₹ ${fx.rates.INR}`;
-          document.getElementById('fxEur').innerText = `€ ${fx.rates.EUR}`;
-          document.getElementById('fxGbp').innerText = `£ ${fx.rates.GBP}`;
+        const btcRes = await fetch('https://api.coindesk.com/v1/bpi/currentprice.json');
+        const btc = await btcRes.json();
+        let tickerStr = `
+          <div class="ticker-item"><span class="text-slate-400">BTC/USD</span> <span class="ticker-up">$${btc.bpi.USD.rate}</span></div>
+          <div class="ticker-item"><span class="text-slate-400">BTC/EUR</span> <span class="ticker-up">€${btc.bpi.EUR.rate}</span></div>
+          <div class="ticker-item"><span class="text-slate-400">BTC/GBP</span> <span class="ticker-up">£${btc.bpi.GBP.rate}</span></div>
+          <div class="ticker-item"><span class="text-slate-400">SYSTEM</span> <span class="text-white">SECURE</span></div>
+        `;
+        document.getElementById('osTicker').innerHTML = tickerStr + tickerStr + tickerStr;
+      } catch (e) { console.warn("Ticker offline"); }
 
-          // Update Ticker
-          let tickerStr = `
-            <div class="ticker-item"><span class="ticker-highlight">USD/INR:</span> ₹${fx.rates.INR}</div>
-            <div class="ticker-item"><span class="ticker-highlight">USD/EUR:</span> €${fx.rates.EUR}</div>
-            <div class="ticker-item"><span class="ticker-highlight">BTC/USD:</span> $${btc.bpi.USD.rate}</div>
-            <div class="ticker-item"><span class="ticker-highlight">MARKET STATUS:</span> Optimal</div>
-          `;
-          document.getElementById('osTicker').innerHTML = tickerStr + tickerStr + tickerStr;
-        }).catch(()=>console.log("Financial APIs Offline"));
-
-        // 3. Cinematic Photography (Picsum)
-        // Refreshing the image source to get a new random image
-        document.getElementById('cinematicShot').src = `https://picsum.photos/400/200?random=${new Date().getTime()}`;
-
-        // 4. Atmospheric Conditions (Open-Meteo focused on high-altitude/Kodaikanal coords)
-        fetch('https://api.open-meteo.com/v1/forecast?latitude=10.2381&longitude=77.4892&current_weather=true')
-          .then(r=>r.json()).then(data => {
-            document.getElementById('wTemp').innerText = Math.round(data.current_weather.temperature) + '°';
-            document.getElementById('wWind').innerText = data.current_weather.windspeed + ' km/h';
-        }).catch(()=>{});
-
-        // 5. Executive Directive (DummyJSON Quotes)
-        fetch('https://dummyjson.com/quotes/random').then(r=>r.json()).then(data => {
-          document.getElementById('osQuote').innerText = `"${data.quote}"`;
-          document.getElementById('osAuthor').innerText = `- ${data.author}`;
-        }).catch(()=>{});
-
-        // 6. Network Security (GeoJS)
-        fetch('https://get.geojs.io/v1/ip/geo.json').then(r=>r.json()).then(data => {
-          document.getElementById('netIp').innerText = data.ip;
-          document.getElementById('netIsp').innerText = (data.organization_name || data.asn || 'Unknown');
-        }).catch(()=>{});
-
-      } catch (err) {
-        console.error("OS Intelligence Engine Error:", err);
+      // API 2: Institutional FX Rates (Using open.er-api.com - extremely stable and CORS friendly)
+      try {
+        const fxRes = await fetch('https://open.er-api.com/v6/latest/USD');
+        const fx = await fxRes.json();
+        document.getElementById('fxInr').innerText = `₹ ${fx.rates.INR.toFixed(2)}`;
+        document.getElementById('fxEur').innerText = `€ ${fx.rates.EUR.toFixed(2)}`;
+        document.getElementById('fxGbp').innerText = `£ ${fx.rates.GBP.toFixed(2)}`;
+      } catch (e) { 
+        console.warn("FX API offline");
+        document.getElementById('fxInr').innerText = "Offline";
+        document.getElementById('fxEur').innerText = "Offline";
+        document.getElementById('fxGbp').innerText = "Offline";
       }
+
+      // API 3: Regional Atmosphere (Open-Meteo for Kodaikanal)
+      try {
+        const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=10.2381&longitude=77.4892&current_weather=true');
+        const weather = await weatherRes.json();
+        document.getElementById('wTemp').innerText = Math.round(weather.current_weather.temperature) + '°';
+        document.getElementById('wWind').innerText = weather.current_weather.windspeed + ' km/h wind';
+      } catch (e) { console.warn("Weather offline"); }
+
+      // API 4: Network Protocol (GeoJS)
+      try {
+        const netRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
+        const net = await netRes.json();
+        document.getElementById('netIp').innerText = net.ip;
+        document.getElementById('netIsp').innerText = (net.organization_name || net.asn || 'Unknown');
+      } catch (e) { console.warn("Network IP offline"); }
     };
 
-    // Initialize Intelligence Engine
-    fetchIntelligence();
-    // Refresh Macro Data every 5 minutes
-    setInterval(fetchIntelligence, 300000);
+    // Boot Data Engine
+    fetchData();
+    // Refresh Macro data every 5 minutes
+    setInterval(fetchData, 300000);
   </script>
 
   <script type="module" src="script.js"></script>
