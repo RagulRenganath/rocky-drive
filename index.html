@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rocky OS | Enterprise Vault</title>
+  <title>Rocky OS | Enterprise Vault & Intelligence</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-app: #f1f5f9; /* Slate 100 */
+      --bg-app: #f1f5f9; 
       --bg-panel: #ffffff;
-      --border-color: #e2e8f0; /* Slate 200 */
-      --text-main: #0f172a; /* Slate 900 */
-      --text-muted: #64748b; /* Slate 500 */
-      --brand-primary: #0f172a; /* Deep Slate */
-      --brand-accent: #2563eb; /* Blue 600 */
+      --border-color: #e2e8f0; 
+      --text-main: #0f172a; 
+      --text-muted: #64748b; 
+      --brand-primary: #0f172a; 
+      --brand-accent: #0284c7; 
     }
 
     body { 
@@ -30,6 +30,7 @@
     .ticker-wrap {
       width: 100%; background: var(--brand-primary); color: #f8fafc;
       overflow: hidden; display: flex; align-items: center; height: 32px;
+      border-bottom: 2px solid var(--brand-accent);
     }
     .ticker-content {
       display: flex; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
@@ -37,16 +38,25 @@
     }
     @keyframes tickerScroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
     .ticker-item { margin-right: 3rem; display: inline-flex; align-items: center; gap: 0.5rem; }
-    .ticker-up { color: #4ade80; } /* Green */
-    .ticker-down { color: #f87171; } /* Red */
+    .ticker-up { color: #4ade80; } 
 
     /* Panel Architecture */
     .sys-panel { 
       background: var(--bg-panel); border: 1px solid var(--border-color); 
       border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
-      transition: box-shadow 0.2s ease;
+      transition: box-shadow 0.2s ease; position: relative; overflow: hidden;
     }
-    .sys-panel:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08); }
+    .sys-panel:hover { box-shadow: 0 6px 12px -2px rgba(0,0,0,0.05); }
+    
+    .panel-accent::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+    }
+
+    /* Quote Shower Transitions */
+    .quote-container { transition: opacity 0.8s ease-in-out; }
+    .quote-fade-out { opacity: 0; }
+    .quote-fade-in { opacity: 1; }
 
     /* Forms & Inputs */
     .form-input {
@@ -54,7 +64,7 @@
       background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;
       color: var(--text-main); transition: all 0.2s;
     }
-    .form-input:focus { outline: none; border-color: var(--brand-accent); background: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .form-input:focus { outline: none; border-color: var(--brand-accent); background: #fff; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
 
     /* Buttons */
     .btn-solid {
@@ -62,7 +72,7 @@
       padding: 0.6rem 1.2rem; border-radius: 8px; transition: all 0.2s; border: 1px solid transparent;
       display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;
     }
-    .btn-solid:hover { background: #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn-solid:hover { background: #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     
     .btn-outline {
       background: #fff; color: var(--text-main); font-weight: 500; font-size: 0.875rem;
@@ -71,43 +81,47 @@
     }
     .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-    /* Progress Bar */
+    /* Progress & Storage Bars */
     .progress-track { height: 6px; border-radius: 4px; background: #e2e8f0; overflow: hidden; width: 100%; }
     .progress-fill { height: 100%; width: 0%; background: var(--brand-accent); transition: width 0.3s ease; }
+    
+    .storage-track { height: 8px; border-radius: 4px; background: #f1f5f9; overflow: hidden; width: 100%; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+    .storage-fill { height: 100%; width: 42%; background: linear-gradient(90deg, #0284c7, #38bdf8); }
 
-    /* Data Table / File List (Strict Formatting) */
+    /* File List Formatting */
     #fileList { list-style: none; padding: 0; margin: 0; }
     #fileList li {
-      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem;
-      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);
+      display: grid; grid-template-columns: 2fr 1fr 1fr auto; align-items: center; gap: 1rem;
+      padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
       transition: background 0.15s;
     }
     #fileList li:last-child { border-bottom: none; }
     #fileList li:hover { background: #f8fafc; }
-    
-    /* Strict Truncation for file names */
     #fileList li > :first-child {
-      font-size: 0.875rem; font-weight: 500; color: var(--text-main);
+      font-size: 0.875rem; font-weight: 600; color: var(--text-main);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }
     
-    /* Action Buttons inside File List */
     #fileList li button, #fileList li a { 
-      font-size: 0.75rem; font-weight: 600; color: var(--text-muted); 
-      background: #f1f5f9; padding: 0.3rem 0.6rem; border-radius: 4px; 
-      transition: all 0.2s; border: 1px solid transparent; cursor: pointer;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-main); 
+      background: #ffffff; padding: 0.4rem 0.8rem; border-radius: 6px; 
+      transition: all 0.2s; border: 1px solid var(--border-color); cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    #fileList li button:hover, #fileList li a:hover { color: var(--brand-accent); background: #eff6ff; border-color: #bfdbfe; }
+    #fileList li button:hover, #fileList li a:hover { color: var(--brand-accent); background: #f0f9ff; border-color: #bae6fd; }
 
     /* Utilities */
     .micro-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-muted); }
     .mono-data { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; }
 
-    /* Scrollbar */
+    /* Live News Feed Scrollbar */
+    .news-scroll::-webkit-scrollbar { width: 4px; }
+    .news-scroll::-webkit-scrollbar-track { background: transparent; }
+    .news-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -119,9 +133,9 @@
   </div>
 
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="max-w-[1500px] mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center">
+        <div class="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center shadow-inner">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
         </div>
         <div class="flex flex-col">
@@ -132,7 +146,10 @@
       
       <div class="flex items-center gap-6">
         <div class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-6">
-          <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
           System Optimal
         </div>
         <button id="signOutBtn" class="hidden text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-red-600 transition-colors">
@@ -142,39 +159,50 @@
     </div>
   </header>
 
-  <main class="w-full max-w-[1440px] mx-auto px-4 md:px-6 py-8 flex-1 flex flex-col relative z-10">
+  <main class="w-full max-w-[1500px] mx-auto px-4 md:px-6 py-8 flex-1 flex flex-col relative z-10">
 
-    <section id="loginCard" class="sys-panel p-8 w-full max-w-sm mx-auto mt-12 animate-[fadeIn_0.3s_ease]">
-      <div class="text-center mb-6">
-        <h2 class="text-xl font-bold text-slate-900">Vault Access</h2>
-        <p class="text-xs text-slate-500 mt-1">Authorized personnel only.</p>
+    <section id="loginCard" class="sys-panel panel-accent p-10 w-full max-w-sm mx-auto mt-12 animate-[fadeIn_0.3s_ease]">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-slate-900">Vault Access</h2>
+        <p class="text-sm text-slate-500 mt-1">Authorized personnel only.</p>
       </div>
-      <div class="space-y-4">
+      <div class="space-y-5">
         <div>
-          <label class="block micro-label mb-1.5">Corporate Email</label>
-          <input id="email" type="email" placeholder="user@enterprise.com" class="form-input">
+          <label class="block micro-label mb-2">Corporate Email</label>
+          <input id="email" type="email" placeholder="user@enterprise.com" class="form-input py-2.5">
         </div>
         <div>
-          <label class="block micro-label mb-1.5">Security Key</label>
-          <input id="password" type="password" placeholder="••••••••" class="form-input">
+          <label class="block micro-label mb-2">Security Key</label>
+          <input id="password" type="password" placeholder="••••••••" class="form-input py-2.5">
         </div>
-        <button id="signInBtn" onclick="login()" class="btn-solid w-full mt-2">
+        <button id="signInBtn" onclick="login()" class="btn-solid w-full mt-4 py-3 text-base shadow-md">
           Authenticate Protocol
         </button>
       </div>
-      <div id="loginError" class="mt-4 p-3 rounded-md bg-red-50 border border-red-100 text-red-600 text-xs font-medium text-center hidden"></div>
+      <div id="loginError" class="mt-5 p-3 rounded-md bg-red-50 border border-red-100 text-red-600 text-xs font-medium text-center hidden"></div>
     </section>
 
     <section id="uploadPanel" class="hidden w-full h-full animate-[fadeIn_0.4s_ease]">
       
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        <aside class="lg:col-span-3 flex flex-col gap-6">
+        <aside class="lg:col-span-3 flex flex-col gap-5">
           
-          <div class="sys-panel p-5">
-            <h3 class="micro-label mb-3 text-slate-400">Local Environment Time</h3>
-            <div class="text-3xl font-light text-slate-900 tracking-tight" id="sysTimeLocal">00:00</div>
+          <div class="sys-panel panel-accent p-6 text-center">
+            <h3 class="micro-label mb-2 text-slate-400">Local Environment Sync</h3>
+            <div class="text-4xl font-light text-slate-900 tracking-tight" id="sysTimeLocal">00:00</div>
             <div class="text-xs text-slate-500 font-medium mt-1" id="sysDateHeader">Loading...</div>
+          </div>
+
+          <div class="sys-panel p-6 bg-slate-900 text-white shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="micro-label text-slate-400">Motivational Directive</h3>
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div id="quoteBox" class="quote-container quote-fade-in min-h-[90px] flex flex-col justify-center">
+              <p id="osQuoteText" class="text-sm font-medium text-slate-200 leading-relaxed italic">"Success is not final; failure is not fatal: It is the courage to continue that counts."</p>
+              <p id="osQuoteAuthor" class="text-xs font-bold text-sky-400 mt-3 text-right uppercase tracking-wider">- System</p>
+            </div>
           </div>
 
           <div class="sys-panel p-5">
@@ -183,166 +211,215 @@
             </div>
             <div class="space-y-3">
               <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span class="text-xs font-semibold text-slate-600">INR</span>
-                <span class="mono-data text-slate-900" id="fxInr">Syncing...</span>
+                <span class="text-xs font-bold text-slate-600">INR</span>
+                <span class="mono-data text-slate-900 font-bold" id="fxInr">Syncing...</span>
               </div>
               <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span class="text-xs font-semibold text-slate-600">EUR</span>
-                <span class="mono-data text-slate-900" id="fxEur">Syncing...</span>
+                <span class="text-xs font-bold text-slate-600">EUR</span>
+                <span class="mono-data text-slate-900 font-bold" id="fxEur">Syncing...</span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-xs font-semibold text-slate-600">GBP</span>
-                <span class="mono-data text-slate-900" id="fxGbp">Syncing...</span>
+                <span class="text-xs font-bold text-slate-600">GBP</span>
+                <span class="mono-data text-slate-900 font-bold" id="fxGbp">Syncing...</span>
               </div>
             </div>
           </div>
 
           <div class="sys-panel p-5">
-            <h3 class="micro-label mb-4 text-slate-400">Regional Atmosphere</h3>
-            <div class="flex items-center gap-4">
-              <div class="text-3xl font-light text-slate-800" id="wTemp">--°</div>
-              <div class="flex flex-col">
-                <span class="text-xs font-bold text-slate-700">Kodaikanal Sector</span>
-                <span class="mono-data text-slate-500" id="wWind">-- km/h wind</span>
-              </div>
+            <div class="flex justify-between items-end mb-3">
+              <h3 class="micro-label text-slate-400">Vault Capacity</h3>
+              <span class="mono-data text-slate-900 text-xs font-bold">42%</span>
             </div>
-          </div>
-
-          <div class="sys-panel p-5">
-            <h3 class="micro-label mb-3 text-slate-400">Connection Protocol</h3>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center"><span class="text-xs text-slate-500">IPv4</span><span class="mono-data text-slate-800" id="netIp">Detecting...</span></div>
-              <div class="flex justify-between items-center"><span class="text-xs text-slate-500">Node</span><span class="mono-data text-slate-800 truncate w-32 text-right" id="netIsp">Detecting...</span></div>
+            <div class="storage-track mb-2"><div class="storage-fill"></div></div>
+            <div class="flex justify-between text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+              <span>420 GB Used</span>
+              <span>1 TB Total</span>
             </div>
           </div>
 
         </aside>
 
-        <main class="lg:col-span-9 flex flex-col gap-6">
+        <main class="lg:col-span-9 flex flex-col gap-6 h-full">
           
-          <div class="sys-panel p-6">
+          <div class="sys-panel panel-accent p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
               <div>
-                <h2 class="text-lg font-bold text-slate-900">Transfer Operations</h2>
-                <p class="text-xs text-slate-500 mt-1">Encrypt and index files into the central directory.</p>
+                <h2 class="text-xl font-bold text-slate-900">Transfer Operations</h2>
+                <p class="text-sm text-slate-500 mt-1">Encrypt and index files into the central directory.</p>
               </div>
-              <div class="w-full sm:w-48 text-left sm:text-right">
-                <span class="micro-label">Network Status</span>
+              <div class="w-full sm:w-56 text-left sm:text-right">
+                <span class="micro-label text-slate-400">Data Pipeline Status</span>
                 <div class="flex items-center sm:justify-end gap-2 mt-1">
-                  <span class="mono-data text-brand-accent" id="progressText">Idle</span>
+                  <span class="mono-data text-brand-accent font-bold" id="progressText">Idle</span>
                 </div>
                 <div class="progress-track mt-2"><div id="progressInner" class="progress-fill"></div></div>
               </div>
             </div>
             
-            <div id="dropArea" class="flex flex-col sm:flex-row gap-4 items-center bg-slate-50 p-4 rounded-lg border border-dashed border-slate-300">
-              <label for="fileInput" class="btn-outline w-full sm:w-auto">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <div id="dropArea" class="flex flex-col sm:flex-row gap-4 items-center bg-slate-50 p-5 rounded-xl border-2 border-dashed border-slate-300 transition hover:border-sky-400">
+              <label for="fileInput" class="btn-outline w-full sm:w-auto shadow-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                 Select Target
               </label>
               <input id="fileInput" type="file" class="hidden" />
+              <button id="uploadBtn" class="btn-solid w-full sm:w-auto shadow-md">Execute Upload</button>
               
-              <button id="uploadBtn" class="btn-solid w-full sm:w-auto">
-                Execute Upload
-              </button>
-              
-              <div class="flex-1 w-full border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-4 flex gap-2">
-                <input id="searchInput" type="search" placeholder="Search indexing..." class="form-input" />
-                <select id="sortSelect" class="form-input cursor-pointer min-w-[120px]">
-                  <option value="updated_desc">Latest</option>
-                  <option value="updated_asc">Oldest</option>
-                  <option value="name_asc">A to Z</option>
-                  <option value="name_desc">Z to A</option>
+              <div class="flex-1 w-full border-t sm:border-t-0 sm:border-l border-slate-200 pt-4 sm:pt-0 sm:pl-5 flex gap-3">
+                <input id="searchInput" type="search" placeholder="Search index..." class="form-input" />
+                <select id="sortSelect" class="form-input cursor-pointer min-w-[130px] font-medium">
+                  <option value="updated_desc">Latest</option><option value="updated_asc">Oldest</option>
+                  <option value="name_asc">A to Z</option><option value="name_desc">Z to A</option>
                 </select>
               </div>
             </div>
           </div>
 
-          <div class="sys-panel flex-1 flex flex-col min-h-[400px] overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-              <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-8 micro-label text-slate-500">Document Identifier</div>
-                <div class="col-span-4 micro-label text-slate-500 text-right">Actions</div>
-              </div>
-            </div>
+          <div class="flex flex-col gap-6 flex-1">
             
-            <div class="flex-1 overflow-y-auto">
-              <ul id="fileList">
-                </ul>
-              <div id="emptyMsg" class="py-20 text-center flex flex-col items-center hidden">
-                <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span class="text-sm font-medium text-slate-500">Vault directory is empty.</span>
+            <div class="sys-panel flex flex-col h-[350px] overflow-hidden">
+              <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/80">
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 micro-label text-slate-500">Document Identifier</div>
+                  <div class="col-span-2 micro-label text-slate-500">Data Size</div>
+                  <div class="col-span-2 micro-label text-slate-500">Status</div>
+                  <div class="col-span-2 micro-label text-slate-500 text-right">Actions</div>
+                </div>
+              </div>
+              <div class="flex-1 overflow-y-auto">
+                <ul id="fileList"></ul>
+                <div id="emptyMsg" class="py-16 text-center flex flex-col items-center hidden">
+                  <svg class="w-10 h-10 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  <span class="text-sm font-medium text-slate-500">Vault directory is empty.</span>
+                </div>
               </div>
             </div>
+
+            <div class="sys-panel flex flex-col h-[220px]">
+              <div class="px-6 py-3 border-b border-slate-200 bg-slate-50/80 flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+                  <h3 class="micro-label text-slate-700">Live Trending Market News</h3>
+                </div>
+                <span class="flex h-2 w-2 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              </div>
+              <div class="flex-1 overflow-y-auto px-6 py-2 news-scroll" id="newsFeed">
+                <div class="py-4 text-center text-xs text-slate-400">Intercepting global news feed...</div>
+              </div>
+            </div>
+
           </div>
 
         </main>
 
       </div>
     </section>
-
   </main>
 
   <script>
-    // 1. Local Time Engine
+    // --- 1. Local Time Engine ---
     const updateTime = () => {
       const now = new Date();
       document.getElementById('sysTimeLocal').innerText = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false});
-      document.getElementById('sysDateHeader').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+      document.getElementById('sysDateHeader').innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     };
     setInterval(updateTime, 1000); updateTime();
 
-    // 2. API Data Engine (Built with try/catch fallbacks so it never breaks the UI)
-    const fetchData = async () => {
+    // --- 2. Motivational Quote Shower Engine ---
+    let quoteList = [];
+    let currentQuoteIndex = 0;
+    
+    const initQuoteShower = async () => {
+      try {
+        // Fetching generic quotes, filtering for motivational length
+        const res = await fetch('https://dummyjson.com/quotes?limit=50');
+        const data = await res.json();
+        quoteList = data.quotes.filter(q => q.quote.length < 120); // Keep them punchy
+        setInterval(rotateQuote, 8000);
+      } catch (e) { console.warn("Quote engine offline."); }
+    };
+
+    const rotateQuote = () => {
+      if(quoteList.length === 0) return;
+      const quoteBox = document.getElementById('quoteBox');
+      const textEl = document.getElementById('osQuoteText');
+      const authorEl = document.getElementById('osQuoteAuthor');
       
-      // API 1: Market Ticker (CoinDesk - very reliable)
+      quoteBox.classList.remove('quote-fade-in');
+      quoteBox.classList.add('quote-fade-out');
+      
+      setTimeout(() => {
+        currentQuoteIndex = (currentQuoteIndex + 1) % quoteList.length;
+        const newQuote = quoteList[currentQuoteIndex];
+        textEl.innerText = `"${newQuote.quote}"`;
+        authorEl.innerText = `- ${newQuote.author}`;
+        quoteBox.classList.remove('quote-fade-out');
+        quoteBox.classList.add('quote-fade-in');
+      }, 800); 
+    };
+
+    // --- 3. Live Trending News Feed (Hacker News API) ---
+    const fetchNews = async () => {
+      try {
+        const res = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+        const storyIds = await res.json();
+        const topIds = storyIds.slice(0, 8); // Grab top 8 stories
+        
+        const newsHtmlPromises = topIds.map(async id => {
+          const storyRes = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+          const story = await storyRes.json();
+          return `
+            <div class="py-3.5 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors -mx-6 px-6 cursor-pointer" onclick="window.open('${story.url}', '_blank')">
+              <h4 class="text-sm font-semibold text-slate-800 leading-snug hover:text-sky-600 transition-colors">${story.title}</h4>
+              <div class="flex items-center gap-4 mt-1.5">
+                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-wider">${story.score} PTS</span>
+                <span class="text-[10px] text-slate-400 font-medium">Source: ${story.by}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        const newsItems = await Promise.all(newsHtmlPromises);
+        document.getElementById('newsFeed').innerHTML = newsItems.join('');
+      } catch (e) {
+        document.getElementById('newsFeed').innerHTML = '<div class="py-4 text-center text-xs text-red-400">Failed to establish news feed connection.</div>';
+      }
+    };
+
+    // --- 4. Market Data Engine (Ticker & FX) ---
+    const fetchMarketData = async () => {
       try {
         const btcRes = await fetch('https://api.coindesk.com/v1/bpi/currentprice.json');
         const btc = await btcRes.json();
         let tickerStr = `
           <div class="ticker-item"><span class="text-slate-400">BTC/USD</span> <span class="ticker-up">$${btc.bpi.USD.rate}</span></div>
           <div class="ticker-item"><span class="text-slate-400">BTC/EUR</span> <span class="ticker-up">€${btc.bpi.EUR.rate}</span></div>
-          <div class="ticker-item"><span class="text-slate-400">BTC/GBP</span> <span class="ticker-up">£${btc.bpi.GBP.rate}</span></div>
-          <div class="ticker-item"><span class="text-slate-400">SYSTEM</span> <span class="text-white">SECURE</span></div>
+          <div class="ticker-item"><span class="text-slate-400">SYSTEM STATUS</span> <span class="text-white">OPTIMAL</span></div>
         `;
         document.getElementById('osTicker').innerHTML = tickerStr + tickerStr + tickerStr;
       } catch (e) { console.warn("Ticker offline"); }
 
-      // API 2: Institutional FX Rates (Using open.er-api.com - extremely stable and CORS friendly)
       try {
         const fxRes = await fetch('https://open.er-api.com/v6/latest/USD');
         const fx = await fxRes.json();
         document.getElementById('fxInr').innerText = `₹ ${fx.rates.INR.toFixed(2)}`;
         document.getElementById('fxEur').innerText = `€ ${fx.rates.EUR.toFixed(2)}`;
         document.getElementById('fxGbp').innerText = `£ ${fx.rates.GBP.toFixed(2)}`;
-      } catch (e) { 
-        console.warn("FX API offline");
-        document.getElementById('fxInr').innerText = "Offline";
-        document.getElementById('fxEur').innerText = "Offline";
-        document.getElementById('fxGbp').innerText = "Offline";
-      }
-
-      // API 3: Regional Atmosphere (Open-Meteo for Kodaikanal)
-      try {
-        const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=10.2381&longitude=77.4892&current_weather=true');
-        const weather = await weatherRes.json();
-        document.getElementById('wTemp').innerText = Math.round(weather.current_weather.temperature) + '°';
-        document.getElementById('wWind').innerText = weather.current_weather.windspeed + ' km/h wind';
-      } catch (e) { console.warn("Weather offline"); }
-
-      // API 4: Network Protocol (GeoJS)
-      try {
-        const netRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
-        const net = await netRes.json();
-        document.getElementById('netIp').innerText = net.ip;
-        document.getElementById('netIsp').innerText = (net.organization_name || net.asn || 'Unknown');
-      } catch (e) { console.warn("Network IP offline"); }
+      } catch (e) { console.warn("FX API offline"); }
     };
 
-    // Boot Data Engine
-    fetchData();
-    // Refresh Macro data every 5 minutes
-    setInterval(fetchData, 300000);
+    // Boot Engines
+    initQuoteShower();
+    fetchMarketData();
+    fetchNews();
+    
+    // Refresh Market & News data every 5 minutes
+    setInterval(() => {
+      fetchMarketData();
+      fetchNews();
+    }, 300000); 
   </script>
 
   <script type="module" src="script.js"></script>
